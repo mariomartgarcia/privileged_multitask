@@ -30,7 +30,7 @@ This repository contains the code for the paper _"Privileged learning via a mult
 
 - `MT_bands.py`. Manages band-related processing for the MT model.  
 - `models.py`. Defines model architectures (U-Net).  
-- `utils.py`. Contains utility functions for various tasks of the image problem 
+- `utils.py`. Contains utility functions for various tasks of the image problem.
 
 ## Contact
 
