@@ -16,6 +16,7 @@ This repository contains the code for the paper _"Privileged learning via a mult
 
 ## Content
 
+### Branch: main
 - `DC_DR.py`. Interpretability for privileged multi-task learning. 
 - `MT_weightP.py`. Handles weight processing for the MT model.  
 - `MT_main.py`. Main script for running the model.  
@@ -23,7 +24,13 @@ This repository contains the code for the paper _"Privileged learning via a mult
 - `models.py`. Defines model architectures.  
 - `utils.py`. Contains utility functions for various tasks.  
 - `download_datasets.py`. Script for downloading required datasets.  
-- `requirements.txt`. Lists dependencies needed for the project.  
+- `requirements.txt`. Lists dependencies needed for the project.
+
+### Branch: mt_imag
+
+- `MT_bands.py`. Manages band-related processing for the MT model.  
+- `models.py`. Defines model architectures (U-Net).  
+- `utils.py`. Contains utility functions for various tasks of the image problem 
 
 ## Contact
 
