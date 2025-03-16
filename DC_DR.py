@@ -39,13 +39,11 @@ args = parser.parse_args()
 
 
 # %%
-text    = ['phishing', 'obesity', 'diabetes', 'wm', 'phoneme', 'magic_telescope', 'mozilla', 'mnist_r',\
-            'fruit', 'mnist_g', 'elect', 'wine', 'kin', 'elevators', 'visual', 'abalone', 'wind', 'sil'] 
-dataset = [ dat.phishing(from_csv = True), dat.obesity(from_csv = True), dat.diabetes(), dat.wm() ,\
-            dat.phoneme(), dat.magictelescope(),  dat.mozilla4(), dat.mnist_r(), \
-            dat.fruit(), dat.mnist_g(), dat.elect(), dat.wine_uci(), \
-            dat.kin(), dat.elevators(), dat.visual(), dat.abal(), \
-            dat.wind(), dat.sil()]
+text    = ['phishing', 'obesity', 'diabetes', 'phoneme', 'mozilla',\
+            'wine', 'abalone', 'wind'] 
+dataset = [ dat.phishing(from_csv = True), dat.obesity(from_csv = True), dat.diabetes(),\
+            dat.phoneme(),  dat.mozilla4(),  dat.wine_uci(), \
+            dat.abal(), dat.wind()]
 
 datasets_dict = dict(zip(text, dataset))
 
@@ -151,19 +149,7 @@ for ind in args.dataset:
             #----------------------------------------------------------
             #UPPER (PRIV)
             #----------------------------------------------------------
-            '''
-            #Create the model 
-            model =  mo.nn_binary_clasification( shap, lay_clas, 'relu')   
-            model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-            
-            #Fit the model
-            model.fit(pri, y_train, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat )])
-
-            #Measure test error
-            y_pre_up = np.ravel([np.round(i) for i in model.predict(pri_test)])
-            err_up_pri.append(1-accuracy_score(y_test, y_pre_up))
-            y_pre_probpi = model.predict(pri)
-            '''
+         
             #----------------------------------------------------------
             #UPPER (REGULAR + PRIV)
             #----------------------------------------------------------
@@ -209,137 +195,6 @@ for ind in args.dataset:
             y_MT = np.column_stack([np.ravel(y_train), np.ravel(pri), np.ravel(y_pre_prob), np.ravel(delta_i)])
 
 
-            '''
-            #XXXXXXXXXXXXXXXXXXXXXXX
-            #DISTILLATION APPROACHES
-            #XXXXXXXXXXXXXXXXXXXXXXX
-            #---------------------------------------------------------
-            #GD
-            #----------------------------------------------------------
-
-            
-            yy_GD = np.column_stack([np.ravel(y_train), np.ravel(y_pre_probpi)])
-            
-            model =  mo.nn_binary_clasification( X_trainr.shape[1], lay_clas, 'relu')     
-            model.compile(loss= ut.loss_GD(1, 0.5), optimizer='adam', metrics=['accuracy'])
-            model.fit(X_trainr, yy_GD, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat)])
-
-            
-            #Measure test error
-            y_pre = np.ravel([np.round(i) for i in model.predict(X_testr)])
-            err_gd.append(1-accuracy_score(y_test, y_pre))  
-
-
-            #---------------------------------------------------------
-            #PFD
-            #----------------------------------------------------------
-
-            
-            yy_PFD = np.column_stack([np.ravel(y_train), np.ravel(y_pre_prob)])
-            
-            model =  mo.nn_binary_clasification( X_trainr.shape[1], lay_clas, 'relu')     
-            model.compile(loss= ut.loss_GD(1, 0.5), optimizer='adam', metrics=['accuracy'])
-            model.fit(X_trainr, yy_PFD, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat)])
-
-            
-            #Measure test error
-            y_pre = np.ravel([np.round(i) for i in model.predict(X_testr)])
-            err_pfd.append(1-accuracy_score(y_test, y_pre))  
-
-
-
-            #---------------------------------------------------------
-            #TPD
-            #----------------------------------------------------------
-
-            delta_i = np.array((y_train == np.round(np.ravel(y_pre_prob)))*1)
-            yy_TPD = np.column_stack([np.ravel(y_train), np.ravel(y_pre_prob), delta_i])
-    
-    
-            model =  mo.nn_binary_clasification( X_trainr.shape[1], lay_clas, 'relu')     
-            model.compile(loss= ut.loss_TPD(1, 1, 0.5), optimizer='adam', metrics=['accuracy'])
-   
-            #Fit the model
-            model.fit(X_trainr, yy_TPD, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs,
-                        callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat)])      
-
-
-            #Measure test error
-            y_pre = np.ravel([np.round(i) for i in model.predict(X_testr)])
-            err_tpd.append(1-accuracy_score(y_test, y_pre))
-
-            #XXXXXXXXXXXXXXXXXXXXXXX
-            #MULTI-TASKS
-            #XXXXXXXXXXXXXXXXXXXXXXX   
-
-            #---------------------------------------------------------
-            #---------------------------------------------------------
-
-            #MODEL1: Standard Multi-task
-            
-            #----------------------------------------------------------
-            #NORMAL M1
-            #----------------------------------------------------------
-
-            model = mo.mt1(X_trainr.shape[1], lay_clas, 'relu')
-            model.compile(loss=ut.multi_task, optimizer="adam", metrics=['accuracy'])
-            model.fit(X_trainr, y_MT, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat )])
-            p = model.predict(X_testr)
-            err1.append(1-accuracy_score(y_test, np.round(p[:,0])))
-            mae1.append(mean_absolute_error(pri_test, p[:,1]))
-
-            #----------------------------------------------------------
-            #PFD M1
-            #----------------------------------------------------------
-
-            model = mo.mt1(X_trainr.shape[1], lay_clas, 'relu')
-            model.compile(loss=ut.multi_taskPFD, optimizer="adam", metrics=['accuracy'])
-            model.fit(X_trainr, y_MT, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat )])
-            p = model.predict(X_testr)
-            err1PFD.append(1-accuracy_score(y_test, np.round(p[:,0])))
-            mae1PFD.append(mean_absolute_error(pri_test, p[:,1]))
-
-            #----------------------------------------------------------
-            #TPD M1
-            #----------------------------------------------------------
-
-            model = mo.mt1(X_trainr.shape[1], lay_clas, 'relu')
-            model.compile(loss=ut.multi_taskTPD, optimizer="adam", metrics=['accuracy'])
-            model.fit(X_trainr, y_MT, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat )])
-            p = model.predict(X_testr)
-            err1TPD.append(1-accuracy_score(y_test, np.round(p[:,0])))
-            mae1TPD.append(mean_absolute_error(pri_test, p[:,1]))
-
-
-
-            #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-            #MODEL2: Multi-task concatenation. Sigma and Temp independent of the instance.
-
-            #----------------------------------------------------------
-            #NORMAL M2
-            #----------------------------------------------------------
-
-            
-            model  = mo.mt2(X_trainr.shape[1], lay_clas, lay_reg, 'relu')
-            model.compile(loss=ut.multi_task, optimizer="adam", metrics=['accuracy'])
-            model.fit(X_trainr, y_MT, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat)])
-            p = model.predict(X_testr)
-            err2.append(1-accuracy_score(y_test, np.round(p[:,0])))
-            mae2.append(mean_absolute_error(pri_test, p[:,1]))
-
-            #----------------------------------------------------------
-            #PFD M2
-            #----------------------------------------------------------
-            model  = mo.mt2(X_trainr.shape[1], lay_clas, lay_reg, 'relu')
-            model.compile(loss=ut.multi_taskPFD, optimizer="adam", metrics=['accuracy'])
-            model.fit(X_trainr, y_MT, epochs=epo, batch_size=bs, verbose = 0, validation_split = vs, callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience = pat)])
-            p = model.predict(X_testr)
-            err2PFD.append(1-accuracy_score(y_test, np.round(p[:,0])))
-            mae2PFD.append(mean_absolute_error(pri_test, p[:,1]))
-            '''
             #----------------------------------------------------------
             #TPD M2
             #----------------------------------------------------------

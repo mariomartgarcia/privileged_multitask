@@ -19,7 +19,7 @@ file_links = {
 }
 
 # Folder where the files will be saved
-output_folder = "data_download"
+output_folder = "data"
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
